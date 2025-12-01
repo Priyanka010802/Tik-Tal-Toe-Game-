@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Gaming Tic Tac Toe</title>
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <style>
+    /* 1. --- FULLSCREEN CENTERED FLEX BODY & GLOW BACKGROUND --- */
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at 70% 40%, #233a54 0%, #161a26 90%),
+                  linear-gradient(120deg, #2c3e50, #232946 90%);
+      background-blend-mode: lighten;
+      overflow: hidden;
+    }
+    .neon-bg-glow {
+      position: fixed;
+      left: 50%;
+      top: 60%;
+      width: 60vw;
+      height: 55vh;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, #3b82f6 0%, #1e293b 70%, transparent 100%);
+      filter: blur(60px) brightness(1.2);
+      opacity: 0.33;
+      z-index: 0;
+      pointer-events: none;
+      animation: glow-move 14s ease-in-out infinite alternate;
+    }
+    @keyframes glow-move {
+      0% { left: 45%; top: 65%; }
+      100% { left: 55%; top: 53%; }
+    }
+
+    /* 2. --- GAME CONTAINER CENTERED AND RESPONSIVE --- */
+    .game-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      background: #11141a;
+      border-radius: 22px;
+      box-shadow: 0 4px 30px #3b82f666, 0 0 15px #60a5facc inset;
+      border: 3px solid #3b82f6cc;
+      padding: 32px 22px 26px 22px;
+      width: 99vw;
+      max-width: 400px;
+      height: 95vh;
+      max-height: 600px;
+      min-height: 330px;
+      box-sizing: border-box;
+      gap: 18px;
+    }
+    h1 {
+      font-weight: 900;
+      font-size: 2.2rem;
+      color: #60a5fa;
+      margin-bottom: 0;
+      text-align: center;
+      letter-spacing: 5px;
+      text-shadow: 0 0 18px #3b82f6cc;
+    }
+    .game-content {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      min-width: 0;
+      padding: 10px 0;
+    }
+
+    /* 3. --- GAME BOARD --- */
+    .board {
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1/1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 15px;
+      background: #1e2431;
+      border-radius: 18px;
+      box-shadow: 0 0 20px #3b82f6cc inset;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .cell {
+      background: #28303e;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(2rem, 7vw, 2.7rem);
+      font-weight: 900;
+      color: #93c5fd;
+      cursor: pointer;
+      box-shadow: 0 0 10px #3b82f6bb inset, 0 6px 18px #60a5fa99;
+      transition: transform 0.25s, color 0.3s, background 0.3s;
+      user-select: none;
+    }
+    .cell:hover:not(.taken) {
+      color: #38bdf8;
+      transform: scale(1.09);
+      box-shadow: 0 0 22px #38bdf8cc inset, 0 11px 30px #60a5faaa;
+    }
+    .cell.taken {
+      cursor: not-allowed;
+      color: #60a5faaa;
+      box-shadow: none;
+    }
+    .info {
+      color: #93c5fd;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: 700;
+      text-shadow: 0 0 8px #3b82f6aa;
+      min-height: 32px;
+      margin-bottom: 5px;
+      margin-top: 6px;
+    }
+    .info .winner {
+      color: #34d399;
+      text-shadow: 0 0 30px #22c55e;
+    }
+    .btn-reset {
+      background: #2563eb;
+      border: none;
+      color: white;
+      font-weight: 900;
+      font-size: 1.04rem;
+      padding: 12px 0;
+      border-radius: 29px;
+      cursor: pointer;
+      width: 85%;
+      box-shadow: 0 4px 18px #3b82f6cc;
+      transition: background 0.3s, box-shadow 0.3s;
+      user-select: none;
+      margin-top: 10px;
+      align-self: center;
+    }
+    .btn-reset:hover {
+      background: #1e40af;
+      box-shadow: 0 0 28px #3b82f6ff;
+    }
+    @media (max-width: 600px) {
+      .game-container {
+        max-width: 99vw; max-height: 99vh; padding: 10px 1vw 12px 1vw;
+      }
+      h1 { font-size: 1.2rem; }
+      .board { max-width: 90vw; gap: 8px; padding: 2px; }
+      .btn-reset { font-size: .98rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 4. --- NEON GLOW BACKGROUND --- -->
+  <div class="neon-bg-glow"></div>
+  <!-- 5. --- GAME CONTAINER --- -->
+  <main class="game-container" data-aos="fade-up" data-aos-duration="800">
+    <h1>Tic Tac Toe</h1>
+    <div class="game-content">
+      <div class="board" id="board"></div>
+      <div class="info" id="game-info"></div>
+    </div>
+    <button class="btn-reset" id="reset-btn">Restart Game</button>
+  </main>
+  <!-- Animate On Scroll JS (optional, for entrance animation)—can remove if not needed -->
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    if (window.AOS) AOS.init();
+    // 6. --- TIC TAC TOE GAME LOGIC ---
+    const boardElement = document.getElementById('board');
+    const infoElement = document.getElementById('game-info');
+    const resetBtn = document.getElementById('reset-btn');
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let gameActive = true;
+    const winningConditions = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    function createBoard() {
+      boardElement.innerHTML = '';
+      board.forEach((cell, idx) => {
+        const div = document.createElement('div');
+        div.classList.add('cell');
+        div.setAttribute('role', 'gridcell');
+        div.setAttribute('aria-label', `Cell ${idx+1}, ${cell || 'empty'}`);
+        div.setAttribute('tabindex', '0');
+        div.dataset.index = idx;
+        div.textContent = cell;
+        if (cell) div.classList.add('taken');
+        div.onclick = () => handleCellClick(idx);
+        div.onkeydown = e => {
+          if ((e.key === ' ' || e.key === 'Enter') && gameActive) {
+            e.preventDefault(); handleCellClick(idx);
+          }
+        };
+        boardElement.appendChild(div);
+      });
+    }
+    function handleCellClick(idx) {
+      if (!gameActive || board[idx]) return;
+      board[idx] = currentPlayer;
+      createBoard();
+      if (checkWinner()) {
+        infoElement.innerHTML = `<span class="winner">Player ${currentPlayer} wins! 🎉</span>`;
+        gameActive = false;
+        return;
+      }
+      if (board.every(cell => cell)) {
+        infoElement.textContent = "It's a draw!";
+        gameActive = false;
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      infoElement.innerHTML = `Player <span>${currentPlayer}</span>'s turn`;
+    }
+    function checkWinner() {
+      return winningConditions.some(c => {
+        const [a,b,c_] = c;
+        return board[a] === currentPlayer && board[b] === currentPlayer && board[c_] === currentPlayer;
+      });
+    }
+    function resetGame() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      gameActive = true;
+      infoElement.innerHTML = `Player <span>${currentPlayer}</span>'s turn`;
+      createBoard();
+    }
+    resetGame();
+    resetBtn.onclick = resetGame;
+  </script>
+</body>
+</html>
